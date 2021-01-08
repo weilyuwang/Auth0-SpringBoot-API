@@ -3,9 +3,12 @@ package com.weilyu.springsecuritywithauth0.web;
 
 import com.stripe.exception.StripeException;
 import com.stripe.model.Card;
+import com.stripe.model.Charge;
 import com.stripe.model.Customer;
-import com.stripe.model.CustomerCollection;
 import com.stripe.net.RequestOptions;
+import com.stripe.param.ChargeCreateParams;
+import com.stripe.param.CustomerCreateParams;
+import com.stripe.param.CustomerUpdateParams;
 import com.weilyu.springsecuritywithauth0.config.StripeConfig;
 import com.weilyu.springsecuritywithauth0.model.Message;
 import lombok.extern.slf4j.Slf4j;
@@ -52,21 +55,16 @@ public class StripeResource {
                 .setApiKey(stripe.getSecretKey())
                 .build();
 
-        Map<String, Object> params = new HashMap<>();
-        params.put(
-                "description",
-                "My First Test Customer (created via backend API)"
-        );
-        params.put(
-                "name",
-                "Jack"
-        );
-        params.put(
-                "email",
-                "jack@api.com"
-        );
+        // Create a Customer:
+        CustomerCreateParams customerParams =
+                CustomerCreateParams.builder()
+                        .setDescription("Customer created via API")
+                        .setName("Test Customer")
+                        .setSource("tok_mastercard")
+                        .setEmail("paying.user@example.com")
+                        .build();
 
-        Customer customer = Customer.create(params, requestOptions);
+        Customer customer = Customer.create(customerParams, requestOptions);
 
         return new Message("Customer: " + customer.getName() + " created");
 
@@ -74,31 +72,52 @@ public class StripeResource {
 
     @PostMapping("/users/{userId}/card")
     @ResponseStatus(HttpStatus.CREATED)
-    public Message createCard(@PathVariable String userId) throws StripeException {
-//
-//        RequestOptions requestOptions = RequestOptions.builder()
-//                .setApiKey(stripe.getSecretKey())
-//                .build();
+    public String createCard(@PathVariable String userId) throws StripeException {
 
-        Map<String, Object> retrieveParams =
-                new HashMap<>();
+        Map<String, Object> retrieveParams = new HashMap<>();
         List<String> expandList = new ArrayList<>();
         expandList.add("sources");
         retrieveParams.put("expand", expandList);
 
-        Customer customer =
-                Customer.retrieve(
-                        userId,
-                        retrieveParams,
-                        null
-                );
+        Customer customer = Customer.retrieve(userId, retrieveParams, null);
 
         Map<String, Object> params = new HashMap<>();
         params.put("source", "tok_mastercard");
 
         Card card = (Card) customer.getSources().create(params);
 
-        return new Message(card.toJson());
+        return card.toJson();
+    }
+
+    @PutMapping("/users/{userId}/card")
+    @ResponseStatus(HttpStatus.OK)
+    public String updateCard(@PathVariable String userId) throws StripeException {
+        Customer customer = Customer.retrieve(userId);
+
+        CustomerUpdateParams params =
+                CustomerUpdateParams.builder()
+                        .setSource("tok_visa")
+                        .build();
+
+        customer.update(params);
+
+        return customer.toJson();
+    }
+
+    @PostMapping("/charge/users/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public String chargeCustomer(@PathVariable String userId) throws StripeException {
+        // Charge the Customer instead of the card:
+        ChargeCreateParams chargeParams =
+                ChargeCreateParams.builder()
+                        .setAmount(100L)
+                        .setCurrency("cad")
+                        .setCustomer(userId)
+                        .build();
+
+        Charge charge = Charge.create(chargeParams);
+
+        return charge.toJson();
     }
 
 }
