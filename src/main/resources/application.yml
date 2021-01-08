@@ -1,8 +1,19 @@
+logging:
+  level:
+    web: debug
+
 auth0:
   audience: https://spring.api
+
+
 spring:
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: https://dev-vcjazv1p.us.auth0.com/
+
+
+stripe:
+  secretKey: ${STRIPE_SECRET_KEY}
+

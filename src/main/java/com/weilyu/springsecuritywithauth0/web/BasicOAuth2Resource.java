@@ -1,27 +1,23 @@
 package com.weilyu.springsecuritywithauth0.web;
 
-
 import com.weilyu.springsecuritywithauth0.model.Message;
 import com.weilyu.springsecuritywithauth0.utils.SecurityUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.swing.text.html.Option;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-import static com.weilyu.springsecuritywithauth0.utils.SecurityUtils.getCurrentUserLogin;
 
+@Slf4j
 @RestController
 @RequestMapping(path = "api", produces = MediaType.APPLICATION_JSON_VALUE)
 // For simplicity of this sample, allow all origins. Real applications should configure CORS for their use case.
 @CrossOrigin(origins = "*")
-public class APIController {
+public class BasicOAuth2Resource {
+
     @GetMapping(value = "/public")
-    public Message publicEndpoint() {
+    public Message publicGetEndpoint() {
         return new Message("You DO NOT need to be authenticated to call /api/public.");
     }
 

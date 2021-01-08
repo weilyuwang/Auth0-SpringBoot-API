@@ -1,7 +1,9 @@
-package com.weilyu.springsecuritywithauth0.security;
+package com.weilyu.springsecuritywithauth0.config;
 
+import com.weilyu.springsecuritywithauth0.utils.AudienceValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -28,12 +30,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
+                .mvcMatchers("/api/stripe/*").permitAll()
                 .mvcMatchers("/api/public").permitAll()
                 .mvcMatchers("/api/private").authenticated()
 //                .mvcMatchers("/api/private-scoped").access("#oauth2.hasScope('read:messages')")
                 .mvcMatchers("/api/private-scoped").hasAuthority("SCOPE_read:messages")
                 .and().cors()
-                .and().oauth2ResourceServer().jwt();
+                .and().csrf().disable() // Disabling CSRF allowed for POST and DELETE requests to be processed.
+                .oauth2ResourceServer().jwt();
+
     }
 
     @Value("${auth0.audience}")

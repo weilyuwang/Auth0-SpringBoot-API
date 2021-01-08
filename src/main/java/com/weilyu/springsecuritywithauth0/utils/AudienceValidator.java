@@ -1,4 +1,4 @@
-package com.weilyu.springsecuritywithauth0.security;
+package com.weilyu.springsecuritywithauth0.utils;
 
 
 import org.springframework.security.oauth2.core.OAuth2Error;
@@ -6,11 +6,11 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-class AudienceValidator implements OAuth2TokenValidator<Jwt> {
+public class AudienceValidator implements OAuth2TokenValidator<Jwt> {
 
     private final String audience;
 
-    AudienceValidator(String audience) {
+    public AudienceValidator(String audience) {
         this.audience = audience;
     }
 
