@@ -2,10 +2,7 @@ package com.weilyu.springsecuritywithauth0.web;
 
 
 import com.stripe.exception.StripeException;
-import com.stripe.model.Card;
-import com.stripe.model.Charge;
-import com.stripe.model.Customer;
-import com.stripe.model.Token;
+import com.stripe.model.*;
 import com.stripe.net.RequestOptions;
 import com.stripe.param.ChargeCreateParams;
 import com.stripe.param.CustomerCreateParams;
@@ -14,6 +11,7 @@ import com.weilyu.springsecuritywithauth0.config.StripeConfig;
 import com.weilyu.springsecuritywithauth0.model.CardDto;
 import com.weilyu.springsecuritywithauth0.model.ChargeDto;
 import com.weilyu.springsecuritywithauth0.model.Message;
+import com.weilyu.springsecuritywithauth0.model.PaymentMethodDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -156,6 +154,26 @@ public class StripeResource {
         Charge charge = Charge.create(chargeParams);
 
         return charge.toJson();
+    }
+
+
+    @GetMapping("/users/{userId}/paymentMethod")
+    @ResponseStatus(HttpStatus.OK)
+    public PaymentMethodDto getPaymentMethod(@PathVariable String userId) throws StripeException {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("customer", userId);
+        params.put("type", "card");
+
+        PaymentMethodCollection paymentMethods = PaymentMethod.list(params);
+        PaymentMethodDto paymentMethodDto = new PaymentMethodDto();
+        paymentMethodDto.setBrand(paymentMethods.getData().get(0).getCard().getBrand());
+        paymentMethodDto.setExp_month(paymentMethods.getData().get(0).getCard().getExpMonth());
+        paymentMethodDto.setExp_year(paymentMethods.getData().get(0).getCard().getExpYear());
+        paymentMethodDto.setLast4(paymentMethods.getData().get(0).getCard().getLast4());
+
+        return paymentMethodDto;
+
     }
 
 }
