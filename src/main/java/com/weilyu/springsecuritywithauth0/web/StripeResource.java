@@ -138,6 +138,7 @@ public class StripeResource {
         customer.update(customerUpdateParams);
 
         return customer.toJson();
+
     }
 
     @PostMapping("/charge/users/{userId}")
@@ -165,14 +166,22 @@ public class StripeResource {
         params.put("customer", userId);
         params.put("type", "card");
 
-        PaymentMethodCollection paymentMethods = PaymentMethod.list(params);
-        PaymentMethodDto paymentMethodDto = new PaymentMethodDto();
-        paymentMethodDto.setBrand(paymentMethods.getData().get(0).getCard().getBrand());
-        paymentMethodDto.setExp_month(paymentMethods.getData().get(0).getCard().getExpMonth());
-        paymentMethodDto.setExp_year(paymentMethods.getData().get(0).getCard().getExpYear());
-        paymentMethodDto.setLast4(paymentMethods.getData().get(0).getCard().getLast4());
+        PaymentMethodDto cardOverviewDto = new PaymentMethodDto();
 
-        return paymentMethodDto;
+        PaymentMethod.list(params).getData()
+                .stream()
+                .findFirst()
+                .ifPresent(paymentMethod -> {
+                    PaymentMethod.Card card = paymentMethod.getCard();
+
+                    cardOverviewDto.setBrand(card.getBrand());
+                    cardOverviewDto.setExp_month(card.getExpMonth());
+                    cardOverviewDto.setExp_year(card.getExpYear());
+                    cardOverviewDto.setLast4(card.getLast4());
+
+                });
+
+        return cardOverviewDto;
 
     }
 
